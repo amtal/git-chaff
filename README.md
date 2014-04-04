@@ -19,4 +19,9 @@ much about run:
 
 `git chaff <days-back> <days-forward>` 
 
+If you need to cover an entire year, do it in one or two month chunks with pushes
+in between. Server-side process responsible for generating stats has a timeout.
+Sorry Octocat :(
+
+
 [1]: https://blog.jcoglan.com/2013/11/15/why-github-is-not-your-cv/

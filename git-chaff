@@ -1,0 +1,68 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+    echo "usage: git chaff <days-back> <days-forward>"
+    echo 
+    echo "Generates fake history for some number of days forward and backward"
+    echo "from current date."
+    exit 1
+fi
+
+rand ()
+{
+    # $RANDOM is too biased for random walks :)
+    #
+    # Drop-in replacement courtesy of Julien Palard:
+    # http://dev-tricks.net/bashism-how-to-generate-random-number-without-random
+    echo $(($(dd if=/dev/urandom count=1 2> /dev/null | cksum | cut -d' ' -f1) % 32768))
+}
+
+# tries to roughly emulate ekmett's commit patterns (if only I was that prolific)
+WALK_MAX_STEP=30 # must be even
+WALK_MAX=26
+WALK_MIN=-8
+
+BURST_CHANCE=7 # how many days between bursts of productivity
+BURST_MAX=100
+
+WALK=0
+for DAY in $(seq -$1 $2); do
+    # bounded random walk, with negative values indicating no activity
+    WALK=$(($WALK+($(rand)%$WALK_MAX_STEP)-($WALK_MAX_STEP/2)))
+    if [[ $WALK -gt $WALK_MAX ]]
+    then 
+        WALK=$WALK_MAX 
+    fi
+    if [[ $WALK -lt $WALK_MIN ]] 
+    then 
+        WALK=$WALK_MIN 
+    fi
+
+    COMMITS=$WALK
+    if [[ $COMMITS -lt 0 ]] 
+    then 
+        COMMITS=0 
+    fi
+
+    # there's also rare spikes of activity beyond the normal walk
+    IS_BURST=$(($(rand)%$BURST_CHANCE))
+    if [[ $IS_BURST -eq 0 ]] 
+    then 
+        COMMITS=$(($COMMITS+($(rand)%$BURST_MAX))) 
+    fi
+
+    # generate commits
+    while [ $COMMITS -gt 0 ]; do
+        DH=$(($RANDOM%24))
+        DM=$(($RANDOM%60)) # fun fact: hexagecimal is a real word, not a typo!
+        DATE=$(date --date="+$DAY day +$DH hour +$DM minute" +%xT%H:%M)
+
+        GIT_AUTHOR_DATE=$DATE
+        export GIT_AUTHOR_DATE
+        GIT_COMMITTER_DATE=$DATE
+        export GIT_COMMITTER_DATE
+        `git commit --allow-empty --allow-empty-message -m ''`
+
+        let COMMITS-=1
+    done
+done

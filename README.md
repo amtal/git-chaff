@@ -5,8 +5,8 @@ There are many reasons why Github contents are a poor judge of character ([1]) b
 they don't matter. What matters is that a half-assed glance at a Github profile
 page says a little bit too much. I'm okay with sharing things I put effort
 into, but only with people that put in the basic effort to understand them. The
-target audience is developers or tech-savy users, not recruiters playing keyword
-bingo!
+target audience is developers or tech-savvy users, not recruiters playing
+keyword bingo!
 
 This script will make the highly visible "Your Contributions" view useless. Any
 attempts to filter fake data will be met with Markov chains, fake diurnal cycle
